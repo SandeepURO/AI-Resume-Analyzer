@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Resume Analyzer</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 950px;
+            margin: auto;
+            background: white;
+            padding: 50px;
+            border-radius: 25px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            font-size: 36px;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        h1 i {
+            color: #667eea;
+            margin-right: 12px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            font-size: 16px;
+            margin-bottom: 40px;
+        }
+
+        .upload-section {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            margin-bottom: 30px;
+            border: 2px dashed #667eea;
+            transition: all 0.3s ease;
+        }
+
+        .upload-section:hover {
+            border-color: #764ba2;
+            transform: translateY(-2px);
+        }
+
+        .upload-icon {
+            font-size: 60px;
+            color: #667eea;
+            margin-bottom: 20px;
+        }
+
+        .file-label {
+            display: block;
+            margin-bottom: 20px;
+            color: #444;
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .file-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 40px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            border: none;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .file-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        button#uploadBtn {
+            padding: 15px 40px;
+            margin-top: 20px;
+            cursor: pointer;
+            border: none;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-size: 18px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        button#uploadBtn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .results-section {
+            display: none;
+            margin-top: 30px;
+        }
+
+        .score-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 30px;
+            border-radius: 20px;
+            text-align: center;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+        }
+
+        .score-label {
+            color: white;
+            font-size: 18px;
+            margin-bottom: 15px;
+            font-weight: 500;
+        }
+
+        .score-value {
+            font-size: 72px;
+            font-weight: 700;
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .score-percentage {
+            font-size: 24px;
+            color: white;
+            font-weight: 600;
+        }
+
+        .skills-section {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 20px;
+            margin-bottom: 30px;
+        }
+
+        .skills-title {
+            font-size: 22px;
+            color: #333;
+            margin-bottom: 20px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .skills-title i {
+            color: #667eea;
+        }
+
+        #skills {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .skill {
+            display: inline-block;
+            padding: 12px 20px;
+            margin: 5px;
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            border-radius: 25px;
+            font-size: 15px;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .skill:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 16px rgba(40, 167, 69, 0.4);
+        }
+
+        .preview-section {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 20px;
+        }
+
+        .preview-title {
+            font-size: 22px;
+            color: #333;
+            margin-bottom: 20px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .preview-title i {
+            color: #667eea;
+        }
+
+        #preview {
+            padding: 25px;
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 15px;
+            white-space: pre-wrap;
+            max-height: 350px;
+            overflow-y: auto;
+            font-size: 15px;
+            color: #444;
+            line-height: 1.6;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        .file-name {
+            margin-top: 15px;
+            color: #667eea;
+            font-weight: 600;
+            font-size: 14px;
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 30px 20px;
+            }
+
+            h1 {
+                font-size: 28px;
+            }
+
+            .score-value {
+                font-size: 56px;
+            }
+
+            .upload-section {
+                padding: 30px 20px;
+            }
+
+            .skill {
+                padding: 10px 16px;
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1><i class="fas fa-file-alt"></i> AI Resume Analyzer</h1>
+    <p class="subtitle">Upload your resume and get instant ATS score & skill extraction</p>
+
+    <div class="upload-section">
+        <div class="upload-icon">
+            <i class="fas fa-cloud-upload-alt"></i>
+        </div>
+        <label class="file-label">Choose your resume file (PDF, DOC, DOCX)</label>
+        
+        <input type="file" id="resumeFile" accept=".pdf,.doc,.docx">
+        
+        <button class="file-btn" onclick="document.getElementById('resumeFile').click()">
+            <i class="fas fa-upload"></i> Select File
+        </button>
+        
+        <div class="file-name" id="fileName"></div>
+        
+        <button type="button" id="uploadBtn" onclick="uploadResume()">
+            <i class="fas fa-rocket"></i> Analyze Resume
+        </button>
+    </div>
+
+    <div class="results-section" id="resultsSection">
+        <div class="score-card">
+            <div class="score-label">🎯 Your Resume ATS Score</div>
+            <div class="score-value" id="scoreValue">0</div>
+            <div class="score-percentage" id="scorePercentage">0%</div>
+        </div>
+
+        <div class="skills-section">
+            <div class="skills-title">
+                <i class="fas fa-star"></i> Extracted Skills
+            </div>
+            <div id="skills"></div>
+        </div>
+
+        <div class="preview-section">
+            <div class="preview-title">
+                <i class="fas fa-eye"></i> Resume Preview
+            </div>
+            <div id="preview"></div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    // Show file name when selected
+    document.getElementById('resumeFile').addEventListener('change', function(e) {
+        const fileName = e.target.files[0]?.name;
+        const fileNameDiv = document.getElementById('fileName');
+        if (fileName) {
+            fileNameDiv.textContent = '✓ Selected: ' + fileName;
+            fileNameDiv.style.display = 'block';
+        }
+    });
+
+    function uploadResume() {
+        const fileInput = document.getElementById('resumeFile');
+        const file = fileInput.files[0];
+
+        if (!file) {
+            alert('Please select a resume file to upload.');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('resume', file);
+
+        fetch('/upload', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            // Show results section
+            document.getElementById('resultsSection').style.display = 'block';
+            
+            // Update score
+            document.getElementById('scoreValue').textContent = data.ats_score;
+            document.getElementById('scorePercentage').textContent = data.ats_score + '%';
+            
+            // Update skills
+            const skillsContainer = document.getElementById('skills');
+            skillsContainer.innerHTML = '';
+            data.skills.forEach(skill => {
+                const skillElem = document.createElement('span');
+                skillElem.className = 'skill';
+                skillElem.innerHTML = `<i class="fas fa-check"></i> ${skill}`;
+                skillsContainer.appendChild(skillElem);
+            });
+            
+            // Update preview
+            document.getElementById('preview').innerText = data.text;
+        })
+        .catch(error => {
+            console.error('Error uploading resume:', error);
+            alert('An error occurred while uploading the resume. Please try again.');
+        });
+    }
+</script>
+
+</body>
+</html>
