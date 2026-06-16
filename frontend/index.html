@@ -123,9 +123,28 @@
             box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
         }
 
+        button#uploadBtn:disabled {
+            background: #999;
+            cursor: wait;
+            transform: none;
+        }
+
+        /* Smooth Result Appearance */
         .results-section {
             display: none;
             margin-top: 30px;
+            animation: fadeIn 0.6s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .score-card {
@@ -202,6 +221,15 @@
             box-shadow: 0 6px 16px rgba(40, 167, 69, 0.4);
         }
 
+        .suggestion {
+            background: #fff3cd;
+            color: #856404;
+            padding: 12px;
+            margin: 10px 0;
+            border-radius: 10px;
+            border-left: 5px solid #ffc107;
+        }
+
         .preview-section {
             background: #f8f9fa;
             padding: 30px;
@@ -242,6 +270,38 @@
             font-weight: 600;
             font-size: 14px;
             display: none;
+        }
+
+        .matched {
+            display: inline-block;
+            padding: 10px 15px;
+            margin: 5px;
+            background: #28a745;
+            color: white;
+            border-radius: 20px;
+        }
+
+        .missing {
+            display: inline-block;
+            padding: 10px 15px;
+            margin: 5px;
+            background: #dc3545;
+            color: white;
+            border-radius: 20px;
+        }
+
+        .match-score-container {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .match-score-text {
+            color: white;
+            font-size: 28px;
+            font-weight: 700;
         }
 
         @media (max-width: 768px) {
@@ -309,6 +369,32 @@
             <div id="skills"></div>
         </div>
 
+        <div class="skills-section">
+            <div class="skills-title">
+                🎯 Job Match Analysis
+            </div>
+
+            <div class="match-score-container">
+                <div class="match-score-text">Match Score: <span id="matchScore">0</span>%</div>
+            </div>
+
+            <h4>✅ Matched Skills</h4>
+            <div id="matchedSkills"></div>
+
+            <br>
+
+            <h4>❌ Missing Skills</h4>
+            <div id="missingSkills"></div>
+        </div>
+
+        <div class="skills-section">
+            <div class="skills-title">
+                💡 Resume Suggestions
+            </div>
+
+            <div id="suggestions"></div>
+        </div>
+
         <div class="preview-section">
             <div class="preview-title">
                 <i class="fas fa-eye"></i> Resume Preview
@@ -333,11 +419,16 @@
     function uploadResume() {
         const fileInput = document.getElementById('resumeFile');
         const file = fileInput.files[0];
+        const uploadBtn = document.getElementById('uploadBtn');
 
         if (!file) {
             alert('Please select a resume file to upload.');
             return;
         }
+
+        // Loading Animation - Disable button and show spinner
+        uploadBtn.disabled = true;
+        uploadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Analyzing...';
 
         const formData = new FormData();
         formData.append('resume', file);
@@ -348,8 +439,14 @@
         })
         .then(response => response.json())
         .then(data => {
-            // Show results section
+            // Show results section with smooth animation
             document.getElementById('resultsSection').style.display = 'block';
+            
+            // Auto-scroll to results
+            document.getElementById('resultsSection')
+                .scrollIntoView({
+                    behavior: 'smooth'
+                });
             
             // Update score
             document.getElementById('scoreValue').textContent = data.ats_score;
@@ -365,12 +462,53 @@
                 skillsContainer.appendChild(skillElem);
             });
             
+            // Update match score
+            document.getElementById('matchScore').textContent = data.match_score;
+
+            // Update matched skills
+            const matchedContainer = document.getElementById('matchedSkills');
+            matchedContainer.innerHTML = '';
+            data.matched_skills.forEach(skill => {
+                const div = document.createElement('span');
+                div.className = 'matched';
+                div.innerHTML = `<i class="fas fa-check-circle"></i> ${skill}`;
+                matchedContainer.appendChild(div);
+            });
+
+            // Update missing skills
+            const missingContainer = document.getElementById('missingSkills');
+            missingContainer.innerHTML = '';
+            data.missing_skills.forEach(skill => {
+                const div = document.createElement('span');
+                div.className = 'missing';
+                div.innerHTML = `<i class="fas fa-minus-circle"></i> ${skill}`;
+                missingContainer.appendChild(div);
+            });
+
+            // Update suggestions
+            const suggestionsContainer = document.getElementById('suggestions');
+            suggestionsContainer.innerHTML = '';
+            data.suggestions.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'suggestion';
+                div.innerHTML = `<i class="fas fa-info-circle"></i> ${item}`;
+                suggestionsContainer.appendChild(div);
+            });
+            
             // Update preview
             document.getElementById('preview').innerText = data.text;
+
+            // Reset button after success
+            uploadBtn.disabled = false;
+            uploadBtn.innerHTML = '<i class="fas fa-rocket"></i> Analyze Resume';
         })
         .catch(error => {
             console.error('Error uploading resume:', error);
             alert('An error occurred while uploading the resume. Please try again.');
+            
+            // Reset button after error
+            uploadBtn.disabled = false;
+            uploadBtn.innerHTML = '<i class="fas fa-rocket"></i> Analyze Resume';
         });
     }
 </script>

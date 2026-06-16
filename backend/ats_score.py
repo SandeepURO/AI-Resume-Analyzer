@@ -1,8 +1,20 @@
-def calculate_ats_score(skills):
+def calculate_ats_score(
+    skills_count,
+    education_count,
+    project_count,
+    experience_count
+):
 
-    score = len(skills) * 8
+    score = 0
 
-    if score > 100:
-        score = 100
+    score += min(skills_count * 4, 40)
 
-    return score
+    score += min(education_count * 5, 15)
+
+    score += min(project_count * 5, 20)
+
+    score += min(experience_count * 5, 15)
+
+    score += 10
+
+    return min(score, 100)
